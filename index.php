@@ -517,6 +517,25 @@ function hideTooltip() {
   tooltip.classList.remove('visible');
 }
 
+let dragOnCube = false;
+
+renderer.domElement.addEventListener('pointerdown', e => {
+  ptrNDC.set(
+    (e.clientX / window.innerWidth)  * 2 - 1,
+   -(e.clientY / window.innerHeight) * 2 + 1
+  );
+  raycaster.setFromCamera(ptrNDC, camera);
+  dragOnCube = raycaster.intersectObjects(cubes).length > 0;
+  if (dragOnCube) controls.enabled = false;
+});
+
+renderer.domElement.addEventListener('pointerup', () => {
+  if (dragOnCube) { controls.enabled = true; dragOnCube = false; }
+});
+renderer.domElement.addEventListener('pointercancel', () => {
+  if (dragOnCube) { controls.enabled = true; dragOnCube = false; }
+});
+
 renderer.domElement.addEventListener('pointermove', e => {
   ptrNDC.set(
     (e.clientX / window.innerWidth)  * 2 - 1,
