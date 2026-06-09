@@ -518,8 +518,17 @@ function hideTooltip() {
 }
 
 let dragOnCube = false;
+const activePointers = new Set();
 
 renderer.domElement.addEventListener('pointerdown', e => {
+  activePointers.add(e.pointerId);
+
+  if (activePointers.size >= 2) {
+    controls.enabled = true;
+    dragOnCube = false;
+    return;
+  }
+
   ptrNDC.set(
     (e.clientX / window.innerWidth)  * 2 - 1,
    -(e.clientY / window.innerHeight) * 2 + 1
@@ -529,11 +538,14 @@ renderer.domElement.addEventListener('pointerdown', e => {
   if (dragOnCube) controls.enabled = false;
 });
 
-renderer.domElement.addEventListener('pointerup', () => {
-  if (dragOnCube) { controls.enabled = true; dragOnCube = false; }
+renderer.domElement.addEventListener('pointerup', e => {
+  activePointers.delete(e.pointerId);
+  if (activePointers.size === 0) { controls.enabled = true; dragOnCube = false; }
 });
-renderer.domElement.addEventListener('pointercancel', () => {
-  if (dragOnCube) { controls.enabled = true; dragOnCube = false; }
+renderer.domElement.addEventListener('pointercancel', e => {
+  activePointers.delete(e.pointerId);
+  controls.enabled = true;
+  dragOnCube = false;
 });
 
 renderer.domElement.addEventListener('pointermove', e => {
