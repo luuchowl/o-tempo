@@ -152,6 +152,8 @@ const VIEW_HALF = 60;
 const BAR_GAP   = 0.92;
 const HEIGHT_MIN = 0.6;
 const HEIGHT_MAX = 20.0;
+const MIN_HEIGHT  = 1.0;   // world units — minimum bar height when a later day is selected
+const SHRINK_DUR  = 0.2;   // seconds for shrink/restore transition
 
 const COLOR_COLD  = new THREE.Color('#4fc3f7');
 const COLOR_MID   = new THREE.Color('#ffb300');
@@ -480,6 +482,15 @@ let hoverDay     = -1;
 const sidebar = document.getElementById('sidebar');
 const legend  = document.getElementById('legend');
 
+function setShrinkTarget(cube, target) {
+  const d = cube.userData;
+  if (d.shrinkTarget === target) return;
+  d.shrinkFrom   = d.shrinkT;
+  d.shrinkTarget = target;
+  d.shrinkStart  = clock.getElapsedTime();
+}
+
+
 function openSidebar(cube) {
   const { month, day, hour, temp } = cube.userData;
   document.getElementById('sb-month').textContent = month;
@@ -562,6 +573,8 @@ renderer.domElement.addEventListener('pointermove', e => {
       if (hoverDay >= 0) for (const c of (cubesByDay.get(hoverDay) ?? [])) c.userData.targetT = 0;
       if (newDay  >= 0) for (const c of (cubesByDay.get(newDay)   ?? [])) c.userData.targetT = 1;
       hoverDay = newDay;
+      for (const cube of cubes)
+        setShrinkTarget(cube, newDay >= 0 && cube.userData.zi > newDay ? 1 : 0);
     }
     selectedCube = hit;
     if (hit) {
@@ -633,9 +646,14 @@ async function buildChart() {
         hour:      HOUR_LABELS[xi],
         temp,
         zi,
-        baseColor: baseColor.clone(),
-        colorT:  0,
-        targetT: 0,
+        h,
+        baseColor:    baseColor.clone(),
+        colorT:       0,
+        targetT:      0,
+        shrinkT:      0,
+        shrinkTarget: 0,
+        shrinkFrom:   0,
+        shrinkStart:  null,
       };
 
       cube.scale.y = 0;
@@ -684,6 +702,20 @@ function animate() {
     if (elapsed >= ANIM_STAGGER + ANIM_RISE) {
       for (const cube of cubes) cube.scale.y = 1;
       animStartTime = null;
+    }
+  }
+
+  // ── Shrink effect (click-selected day hides newer bars) ──────────────────
+  if (animStartTime === null) {
+    for (const cube of cubes) {
+      const d = cube.userData;
+      if (d.shrinkStart !== null) {
+        const t = Math.min(1, (now - d.shrinkStart) / SHRINK_DUR);
+        d.shrinkT = d.shrinkFrom + (d.shrinkTarget - d.shrinkFrom) * cubicSmooth(t);
+        if (t >= 1) { d.shrinkT = d.shrinkTarget; d.shrinkStart = null; }
+      }
+      const minScale  = Math.min(1, MIN_HEIGHT / d.h);
+      cube.scale.y = 1 - d.shrinkT * (1 - minScale);
     }
   }
 
