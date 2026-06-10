@@ -348,11 +348,15 @@ function setShrinkTarget(cube, target) {
 }
 
 function openSidebar(cube) {
-  const { month, day, hour, temp } = cube.userData;
-  document.getElementById('sb-month').textContent = month;
-  document.getElementById('sb-day').textContent   = day;
-  document.getElementById('sb-hour').textContent  = hour;
-  document.getElementById('sb-temp').textContent  = `${temp.toFixed(1)} °C`;
+  const { month, day, zi } = cube.userData;
+  const dayTemps = Array.from({ length: GRID_X }, (_, xi) => grid[xi][zi]).filter(v => v !== null);
+  const avg = dayTemps.reduce((s, v) => s + v, 0) / dayTemps.length;
+  const min = Math.min(...dayTemps);
+  const max = Math.max(...dayTemps);
+  document.getElementById('sb-day').textContent    = day;
+  document.getElementById('sb-month').textContent  = month;
+  document.getElementById('sb-avg').textContent    = `${avg.toFixed(1)} °C`;
+  document.getElementById('sb-minmax').textContent = `${min.toFixed(1)} / ${max.toFixed(1)} °C`;
   sidebar.classList.add('open');
   legend.classList.add('shifted');
 }
@@ -360,6 +364,7 @@ function openSidebar(cube) {
 function closeSidebar() {
   sidebar.classList.remove('open');
   legend.classList.remove('shifted');
+  curvePlane.visible = false;
 }
 
 // ── Hover detection ───────────────────────────────────────────────────────────

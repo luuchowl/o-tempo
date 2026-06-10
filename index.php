@@ -126,10 +126,10 @@ if (is_readable($csv_path)) {
 <div id="tooltip"></div>
 
 <div id="sidebar">
-  <div class="sb-field"><span class="sb-label">month</span><span class="sb-value" id="sb-month">—</span></div>
   <div class="sb-field"><span class="sb-label">day</span><span class="sb-value" id="sb-day">—</span></div>
-  <div class="sb-field"><span class="sb-label">hour</span><span class="sb-value" id="sb-hour">—</span></div>
-  <div class="sb-field"><span class="sb-label">avg temp</span><span class="sb-value temp" id="sb-temp">—</span></div>
+  <div class="sb-field"><span class="sb-label">month</span><span class="sb-value" id="sb-month">—</span></div>
+  <div class="sb-field"><span class="sb-label">avg</span><span class="sb-value temp" id="sb-avg">—</span></div>
+  <div class="sb-field"><span class="sb-label">min / max</span><span class="sb-value" id="sb-minmax">—</span></div>
 </div>
 
 <div id="error">
