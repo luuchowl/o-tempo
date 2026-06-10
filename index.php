@@ -65,10 +65,10 @@ if (is_readable($csv_path)) {
     #sidebar {
       position: fixed;
       top: 0; right: 0; bottom: 0;
-      width: 130px;
+      width: 180px;
       background: rgba(10, 10, 20, 0.94);
       border-left: 1px solid #1e1e3f;
-      transform: translateX(130px);
+      transform: translateX(180px);
       transition: transform 0.25s ease;
       display: flex;
       flex-direction: column;
